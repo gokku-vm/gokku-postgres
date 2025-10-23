@@ -40,8 +40,9 @@ echo "Image: ${POSTGRES_IMAGE:-postgres:latest}"
 echo "User: $POSTGRES_USER"
 echo "Password: $POSTGRES_PASSWORD"
 echo "Database: $POSTGRES_DB"
-echo "Configuration: $CONFIG_DIR"
 echo "Data volume: $DATA_VOLUME"
+echo "Configuration: $CONFIG_DIR"
+echo "URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:$PORT/$POSTGRES_DB"
 
 # Get PostgreSQL-specific information
 if container_is_running "$SERVICE_NAME"; then
