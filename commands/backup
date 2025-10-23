@@ -16,9 +16,10 @@ if ! container_is_running "$SERVICE_NAME"; then
     exit 1
 fi
 
-# Get PostgreSQL credentials
-POSTGRES_USER=$(get_service_config "$SERVICE_NAME" | grep -o '"user":"[^"]*"' | cut -d'"' -f4)
-POSTGRES_DB=$(get_service_config "$SERVICE_NAME" | grep -o '"database":"[^"]*"' | cut -d'"' -f4)
+# Get PostgreSQL credentials using jq
+SERVICE_CONFIG=$(get_service_config "$SERVICE_NAME")
+POSTGRES_USER=$(echo "$SERVICE_CONFIG" | jq -r '.config.user // empty')
+POSTGRES_DB=$(echo "$SERVICE_CONFIG" | jq -r '.config.database // empty')
 
 # Dump database to stdout
 docker exec "$SERVICE_NAME" pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"

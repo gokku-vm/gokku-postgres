@@ -17,6 +17,7 @@ Examples:
   gokku services:create postgres --name pg-0
   gokku services:create postgres:14 --name pg-0
   gokku services:link pg-0 -a api-prod
+  
   gokku postgres:info pg-0
   gokku postgres:psql pg-0
   gokku postgres:backup pg-0 > backup.sql

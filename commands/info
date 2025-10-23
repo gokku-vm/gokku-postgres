@@ -23,11 +23,15 @@ fi
 STATUS=$(get_container_status "$SERVICE_NAME")
 PORT=$(get_container_port "$SERVICE_NAME" 5432)
 UPTIME=$(get_container_uptime "$SERVICE_NAME")
-CONFIG_DIR=$(get_service_config "$SERVICE_NAME" | grep -o '"config_dir":"[^"]*"' | cut -d'"' -f4)
-DATA_VOLUME=$(get_service_config "$SERVICE_NAME" | grep -o '"data_volume":"[^"]*"' | cut -d'"' -f4)
-POSTGRES_USER=$(get_service_config "$SERVICE_NAME" | grep -o '"user":"[^"]*"' | cut -d'"' -f4)
-POSTGRES_DB=$(get_service_config "$SERVICE_NAME" | grep -o '"database":"[^"]*"' | cut -d'"' -f4)
-POSTGRES_IMAGE=$(get_service_config "$SERVICE_NAME" | grep -o '"image":"[^"]*"' | cut -d'"' -f4)
+
+# Parse service config using jq
+SERVICE_CONFIG=$(get_service_config "$SERVICE_NAME")
+CONFIG_DIR=$(echo "$SERVICE_CONFIG" | jq -r '.config.config_dir // empty')
+DATA_VOLUME=$(echo "$SERVICE_CONFIG" | jq -r '.config.data_volume // empty')
+POSTGRES_USER=$(echo "$SERVICE_CONFIG" | jq -r '.config.user // empty')
+POSTGRES_DB=$(echo "$SERVICE_CONFIG" | jq -r '.config.database // empty')
+POSTGRES_IMAGE=$(echo "$SERVICE_CONFIG" | jq -r '.config.image // empty')
+POSTGRES_PASSWORD=$(echo "$SERVICE_CONFIG" | jq -r '.config.password // empty')
 
 echo "Status: $STATUS"
 echo "Port: $PORT"
@@ -48,7 +52,6 @@ if container_is_running "$SERVICE_NAME"; then
     echo "Version: $PG_VERSION"
 
     # Get database size
-    POSTGRES_PASSWORD=$(get_service_config "$SERVICE_NAME" | grep -o '"password":"[^"]*"' | cut -d'"' -f4)
     DB_SIZE=$(docker exec "$SERVICE_NAME" psql -U "$POSTGRES_USER" -c "SELECT pg_size_pretty(pg_database_size('$POSTGRES_DB'));" -t 2>/dev/null | tr -d ' ' || echo "Unknown")
     echo "Database size: $DB_SIZE"
 
